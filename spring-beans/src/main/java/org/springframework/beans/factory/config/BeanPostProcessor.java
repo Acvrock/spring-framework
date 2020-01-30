@@ -54,6 +54,27 @@ import org.springframework.lang.Nullable;
  * @see DestructionAwareBeanPostProcessor
  * @see ConfigurableBeanFactory#addBeanPostProcessor
  * @see BeanFactoryPostProcessor
+ *
+ *
+ * Factory 钩子 允许在创建 Bean 实例时进行自定义修改  &mdash;
+ * 例如, 检查标记接口或使用代理包装.
+ *
+ * <p>通常，通过标记接口或类似对象填充Bean的后处理器将实现 {@link #postProcessBeforeInitialization},
+ * 而使用代理包装bean的后处理器通常将实现 {@link #postProcessAfterInitialization}.
+ *
+ * <h3>注册</h3>
+ * <p> {@code applicationcontext}可以在其bean定义中自动检测{@code beanpostprocessor} bean，并将这些后处理器应用于随后创建的
+ * 任何bean。普通的{@code beanfactory}允许以编程方式注册后处理器，并将其应用于通过bean工厂创建的所有bean。
+ *
+ * <h3>排序</h3>
+ *
+ * 在{@code ApplicationContext}中自动检测到的{@code BeanPostProcessor} bean将根据
+ * {@link org.springframework.core.PriorityOrdered}和
+ * {@link org.springframework.core.Ordered}语义进行排序。
+ * 否则，就以{@code BeanFactory}编程方式注册的 {@code BeanPostProcessor} bean 的注册顺序进行排序；
+ * 通过程序注册的后处理器将忽略通过实现{@code PriorityOrdered}或{@code Ordered}接口表示的任何排序语义。
+ * 此外，对于{@code BeanPostProcessor} bean，不考虑 {@link org.springframework.core.annotation.Order @Order}注解。
+ *
  */
 public interface BeanPostProcessor {
 

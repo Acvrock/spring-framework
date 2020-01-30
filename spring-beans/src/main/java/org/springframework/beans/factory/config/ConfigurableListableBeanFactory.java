@@ -38,6 +38,7 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 03.11.2003
  * @see org.springframework.context.support.AbstractApplicationContext#getBeanFactory()
+ * 集成几个接口
  */
 public interface ConfigurableListableBeanFactory
 		extends ListableBeanFactory, AutowireCapableBeanFactory, ConfigurableBeanFactory {
@@ -59,6 +60,12 @@ public interface ConfigurableListableBeanFactory
 	 * @param ifc the dependency interface to ignore
 	 * @see org.springframework.beans.factory.BeanFactoryAware
 	 * @see org.springframework.context.ApplicationContextAware
+	 *
+	 * 忽略给定的依赖接口进行自动装配。
+	 * <p>通常由应用程序上下文用来注册以其他方式解析的依赖项，
+	 * 例如通过BeanFactoryAware的BeanFactory或通过ApplicationContextAware的ApplicationContext。
+	 * <p>默认情况下，仅BeanFactoryAware接口被忽略。
+	 * 要忽略其他类型，请为每种类型调用此方法。
 	 */
 	void ignoreDependencyInterface(Class<?> ifc);
 
@@ -77,6 +84,16 @@ public interface ConfigurableListableBeanFactory
 	 * @param autowiredValue the corresponding autowired value. This may also be an
 	 * implementation of the {@link org.springframework.beans.factory.ObjectFactory}
 	 * interface, which allows for lazy resolution of the actual target value.
+	 *
+	 * 用相应的自动注入值注册一个特殊的依赖类型。<p>这用于工厂/上下文引用可以自动注入，但在工厂中未定义的bean：
+	 * 例如ApplicationContext实例存在ApplicationContext类型的依赖关系
+	 * <p>注意：在普通BeanFactory中没有注册此类默认类型，甚至不针对BeanFactory接口本身。
+	 * @param dependencyType 要注册的依赖项类型。这通常是基本接口（例如BeanFactory），
+	 * 并对其扩展进行了解析如果声明为自动装配依赖项（例如ListableBeanFactory），只要给定值实际实现扩展接口即可。
+	 * @param autowiredValue 对应的自动装配值。这也可能是{@link org.springframework.beans.factory.ObjectFactory}的实现，
+	 * 可延迟解析实际目标值。
+	 * @pjh 一些特殊的 Bean 由特殊的 BeanFactory生成，不能通过正常的依赖实例化得到，所以采用一个Map来标记，
+	 * 如果匹配到这些特殊类型，直接就由特殊的 BeanFactory生成
 	 */
 	void registerResolvableDependency(Class<?> dependencyType, @Nullable Object autowiredValue);
 

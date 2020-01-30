@@ -77,6 +77,28 @@ import org.springframework.web.context.ServletContextAware;
  * @see org.springframework.web.context.ConfigurableWebApplicationContext#setConfigLocations
  * @see org.springframework.ui.context.ThemeSource
  * @see XmlWebApplicationContext
+ *
+ * {@link org.springframework.context.support.AbstractRefreshableApplicationContext} 是
+ * {@link org.springframework.web.context.ConfigurableWebApplicationContext} 接口的一个Web环境实现类
+ * 提供了一个 "configLocations" 属性,这个属性会在web应用启动时由 ConfigurableWebApplicationContext 进行填充
+ *
+ * <p>这个类和 AbstractRefreshableApplicationContext 一样容易继承并拓展:
+ * 只需要实现 {@link #loadBeanDefinitions} 方法;. 注意，应该假定这个实现是通过{@link #getConfigLocations} 获取到文件加载的
+ *
+ * <p>将资源路径解释为servlet上下文资源，即作为Web应用程序根目录下的绝对路径，例如对于Web应用程序根目录之外的文件，可以通过 {@link org.springframework.core.io.DefaultResourceLoader}实现的“file:” URL访问
+ *
+ * <p>除了{@link org.springframework.context.support.AbstractApplicationContext}
+ * 检测到的特殊bean之外，此类还在上下文中的特殊bean下检测到类型为{@link org.springframework.ui.context.ThemeSource}
+ * 的bean。名称为“ themeSource
+ *
+ * <p><b>这是要为另一种bean定义格式而拓展的Web上下文。</ b>这样的上下文实现可以指定为
+ * {@link org.springframework.web.context.ContextLoader}的“ contextClass”上下文参数，也可以指定为“
+ * {@link org.springframework.web.servlet.FrameworkServlet}的contextClass”初始化参数，
+ * 替换了默认的{@link XmlWebApplicationContext}。然后，它将分别自动接收“ contextConfigLocation”上下文参数或init参数。
+ *
+ * <p>请注意，通常应该基于通过{@link ConfigurableWebApplicationContext}接口接收到的配置来配置WebApplicationContext实现。
+ * 相反，独立的应用程序上下文可能允许在自定义启动代码中进行配置
+ * （例如，{@ link org.springframework.context.support.GenericApplicationContext}）。
  */
 public abstract class AbstractRefreshableWebApplicationContext extends AbstractRefreshableConfigApplicationContext
 		implements ConfigurableWebApplicationContext, ThemeSource {
@@ -170,7 +192,11 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		beanFactory.ignoreDependencyInterface(ServletConfigAware.class);
 
+		// 注册 Web 应用的 Bean 作用范围，Web Request（一次 Http 请求或者接口调用）、Session（一次 Web 会话，从浏览器打开到关闭）
+		// 同时注册 Web Request、Response、Session 的工厂 Bean
 		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);
+
+		// 注册 Servlet 上下文和配置参数，并注册两个 Bean 用于存放这些参数
 		WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext, this.servletConfig);
 	}
 

@@ -54,6 +54,7 @@ import org.springframework.lang.Nullable;
  * @since 16 April 2001
  * @see HierarchicalBeanFactory
  * @see BeanFactoryUtils
+ * @pjh 实现对 Bean 实例的枚举，对一些共同特征的 Bean 的管理
  */
 public interface ListableBeanFactory extends BeanFactory {
 
