@@ -36,6 +36,8 @@ import org.springframework.util.CollectionUtils;
  * Default implementation of the {@link NamespaceHandlerResolver} interface.
  * Resolves namespace URIs to implementation classes based on the mappings
  * contained in mapping file.
+ * {@link NamespaceHandlerResolver}接口的默认实现。
+ * 根据映射文件中包含的映射将名称空间URI解析为实现类。
  *
  * <p>By default, this implementation looks for the mapping file at
  * {@code META-INF/spring.handlers}, but this can be changed using the
@@ -46,6 +48,7 @@ import org.springframework.util.CollectionUtils;
  * @since 2.0
  * @see NamespaceHandler
  * @see DefaultBeanDefinitionDocumentReader
+ *
  */
 public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver {
 
@@ -115,6 +118,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	@Override
 	@Nullable
 	public NamespaceHandler resolve(String namespaceUri) {
+		// 获取 META-INF/spring.handlers 中的值，放在Map中
 		Map<String, Object> handlerMappings = getHandlerMappings();
 		Object handlerOrClassName = handlerMappings.get(namespaceUri);
 		if (handlerOrClassName == null) {
@@ -131,6 +135,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 					throw new FatalBeanException("Class [" + className + "] for namespace [" + namespaceUri +
 							"] does not implement the [" + NamespaceHandler.class.getName() + "] interface");
 				}
+				// 如果 map中只是 handler 的 className，就实例化，并且调用 init 方法
 				NamespaceHandler namespaceHandler = (NamespaceHandler) BeanUtils.instantiateClass(handlerClass);
 				namespaceHandler.init();
 				handlerMappings.put(namespaceUri, namespaceHandler);

@@ -41,6 +41,13 @@ import org.springframework.lang.Nullable;
  * @since 2.0
  * @see #registerBeanDefinitionParser(String, BeanDefinitionParser)
  * @see #registerBeanDefinitionDecorator(String, BeanDefinitionDecorator)
+ *
+ * 用于实现自定义{@link NamespaceHandler NamespaceHandlers}的支持类。
+ * 各个{@link Node Nodes}的解析和修饰是通过{@link BeanDefinitionParser}和{@link BeanDefinitionDecorator}策略接口完成的
+ *
+ * <p>提供{@link #registerBeanDefinitionParser}和{@link #registerBeanDefinitionDecorator} 方法实现
+ * 支持注册{@link BeanDefinitionParser}或{@link BeanDefinitionDecorator}，用于处理特定元素。
+ * 标签解析的抽象模版类，继承该类可很容易的实现自己的 NamespaceHandler
  */
 public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 

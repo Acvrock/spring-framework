@@ -81,6 +81,11 @@ import org.springframework.util.xml.DomUtils;
  * @since 2.0
  * @see ParserContext
  * @see DefaultBeanDefinitionDocumentReader
+ * 把 XML 文档元素解析成 BeanDefinition 实例
+  Stateful delegate class used to parse XML bean definitions.
+    Intended for use by both the main parser and any extension
+   {@link BeanDefinitionParser BeanDefinitionParsers} or
+   {@link BeanDefinitionDecorator BeanDefinitionDecorators}.
  */
 public class BeanDefinitionParserDelegate {
 
@@ -1379,15 +1384,18 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele, @Nullable BeanDefinition containingBd) {
+		// 获取当前节点的 NamespaceURI,为解析特定标签作准备
 		String namespaceUri = getNamespaceURI(ele);
 		if (namespaceUri == null) {
 			return null;
 		}
+		// 先获取当前 XMLReaderContext 中的 NamespaceHandlerResolver，然后获取指定的 NamespaceHandler
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
+		// 使用 NamespaceHandler 解析标签
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 

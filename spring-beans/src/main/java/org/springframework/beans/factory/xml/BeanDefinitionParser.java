@@ -35,6 +35,10 @@ import org.springframework.lang.Nullable;
  * @since 2.0
  * @see NamespaceHandler
  * @see AbstractBeanDefinitionParser
+ *
+ * {@link DefaultBeanDefinitionDocumentReader}用于处理自定义，顶级（直接位于{@code <beans />}下的）标签。
+ * <p>实现类可以根据需要，自由地将自定义标签中的元数据变成尽可能多的{@link BeanDefinition BeanDefinitions}。
+ * <p>解析器从关联的{@link NamespaceHandler}中为自定义标签所在的名称空间找到一个{@link BeanDefinitionParser}。
  */
 public interface BeanDefinitionParser {
 
