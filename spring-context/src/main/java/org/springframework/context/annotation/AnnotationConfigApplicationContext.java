@@ -50,6 +50,15 @@ import org.springframework.util.Assert;
  * @see AnnotatedBeanDefinitionReader
  * @see ClassPathBeanDefinitionScanner
  * @see org.springframework.context.support.GenericXmlApplicationContext
+ *
+ * 独立的应用程序上下文，接受<em>组件类</ em>作为输入
+ * 特别是{@link Configuration @Configuration}注释的类
+ * 也支持普通{@link org.springframework.stereotype.Component @Component}类型
+ * 和JSR-330规范{@code javax.inject}类。
+ *
+ * <p>允许使用{@link #register（Class ...）}逐一注册类以及使用{@link #scan（String ...）}进行类路径扫描。
+ * <p>如果有多个{@code @Configuration}类，{@link Bean @Bean}方法定义，靠后的类定义的方法将覆盖靠前的类定义方法
+ * 可以通过额外的{@code @Configuration}类额外的操作覆盖某些Bean定义
  */
 public class AnnotationConfigApplicationContext extends GenericApplicationContext implements AnnotationConfigRegistry {
 
