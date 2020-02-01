@@ -43,6 +43,12 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.core.Ordered
  * @see org.springframework.core.annotation.Order
  * @see javax.annotation.Priority
+{@code AnnotationAwareOrderComparator} is an extension of
+  {@link OrderComparator} that supports Spring's
+  {@link org.springframework.core.Ordered} interface as well as the
+  {@link Order @Order} and {@link javax.annotation.Priority @Priority}
+  annotations, with an order value provided by an {@code Ordered}
+  instance overriding a statically defined annotation value (if any).
  */
 public class AnnotationAwareOrderComparator extends OrderComparator {
 
