@@ -24,6 +24,8 @@ import org.springframework.lang.Nullable;
  *
  * @author Rob Harrop
  * @since 2.0
+ *
+ * 将metadata 附加到任意对象，或者从任意对象中取出的定义
  */
 public interface AttributeAccessor {
 
