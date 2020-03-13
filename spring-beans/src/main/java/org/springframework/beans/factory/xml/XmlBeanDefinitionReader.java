@@ -385,6 +385,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 * @see #doLoadDocument
 	 * @see #registerBeanDefinitions
+	 * 一就是通过调用XML的解析器获取到 document 对象，完成通用XML解析
+	 * 二就是按照Spring的Bean规则进行解析。Spring的Bean规则进行解析这个过程是BeanDefinitionDocumentReader来实现的，里面包含了各种Spring Bean定义规则的处理
 	 */
 	protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource)
 			throws BeanDefinitionStoreException {

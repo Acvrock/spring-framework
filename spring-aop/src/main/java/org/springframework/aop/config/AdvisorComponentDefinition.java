@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * 关联 Advisor Bean 描述信息和组合 Bean
  */
 public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 

@@ -518,27 +518,33 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		//加锁 防止启动、关闭、注册回调函数的重复调用，保证上下文的对象状态
 		synchronized (this.startupShutdownMonitor) {
 			// Prepare this context for refreshing.
+			//准备工作，记录下容器的启动时间、标记“已启动”状态、处理配置文件中的占位符
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
 			// 通知调用实现类刷新，读取xml文件等就在这里实现
+			// 配置会解析成一个个 Bean 定义，注册到 BeanFactory 中
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
-			// 初始化、设置 BeanFactory 的初始参数
+			// 初始化、设置 BeanFactory 的初始参数 //添加几个 BeanPostProcessor，手动注册几个特殊的 bean
 			prepareBeanFactory(beanFactory);
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
+				// 容器初始化以后，Spring 会负责调用BeanFactoryPostProcessor里面的 postProcessBeanFactory 方法
 				// 通知 BeanFactory 实例化后置处理器，也是通知实现类 Spring boot 场景会用到
 				postProcessBeanFactory(beanFactory);
 
 				// Invoke factory processors registered as beans in the context.
-				// TODO pjh 作用？
+				// 调用 BeanFactoryPostProcessor 各个实现类的 postProcessBeanFactory(factory) 方法
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
 				// 在 Bean 工厂中注册 Bean 的后置处理器（BeanPostProcessor），Bean 的代理的生成由他来实现
+				// 注册 BeanPostProcessor 的实现类，注意看和 BeanFactoryPostProcessor 的区别
+				// 此接口两个方法: postProcessBeforeInitialization 和 postProcessAfterInitialization
+				// 两个方法分别在 Bean 初始化之前和初始化之后得到执行。注意，到这里 Bean 还没初始化
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
@@ -550,14 +556,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
-				// 调用实现类的onRefresh 方法，实现拓展
+				// 调用实现类的onRefresh 方法，实现拓展  具体的子类可以在这里初始化一些特殊的 Bean（在初始化 singleton beans 之前）
 				onRefresh();
 
 				// Check for listener beans and register them.
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
-				// 把所有非延迟加载的Bean 初始化，并设置冻结标志位，防止重复实例化
+				// 把所有非延迟加载的Bean 初始化，并设置冻结标志位，防止重复实例化,非常重要
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.

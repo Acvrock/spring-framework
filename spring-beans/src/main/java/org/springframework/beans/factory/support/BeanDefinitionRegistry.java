@@ -44,6 +44,11 @@ import org.springframework.core.AliasRegistry;
  * @see org.springframework.context.support.GenericApplicationContext
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  * @see PropertiesBeanDefinitionReader
+ *
+ * 用来把 Bean 的描述信息注册到容器中。Spring 注册 Bean时一般是获取 Bean 后用 BeanDefinitionRegistry 把 Bean 注册到当前 BeanFactory 中
+ *  该接口定义了：保存 bean 定义的注册表，如保存：RootBeanDefinition 和 ChildBeanDefinition 实例。 通常由内部在 AbstractBeanDefinition 层次结构的 BeanFactories 完成这些方法实现。
+ *  <p>这是Spring的bean工厂包中唯一封装<i>registration</i> bean定义的接口。 标准BeanFactory接口仅涵盖对<i>完全配置的工厂实例</i>的访问，不提供该接口实现。
+ *  <p> Spring的Bean定义readers如果希望使用此接口。 Spring core 中的已知实现者是DefaultListableBeanFactory和GenericApplicationContext。
  */
 public interface BeanDefinitionRegistry extends AliasRegistry {
 

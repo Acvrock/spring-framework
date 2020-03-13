@@ -123,7 +123,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 */
 	@Override
 	protected final void refreshBeanFactory() throws BeansException {
-		//如果存在工厂，则销毁工厂中的 Bean，关闭但前 BeanFactory
+		//如果当前， ApplicationContext 已经加载过 BeanFactory，存在工厂，则销毁工厂中的 Bean，关闭当前 BeanFactory
 		if (hasBeanFactory()) {
 			destroyBeans();
 			closeBeanFactory();
@@ -132,7 +132,10 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		try {
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			beanFactory.setSerializationId(getId());
+			// 设置 BeanFactory 的两个重要属性
+			// 是否允许 Bean 覆盖、是否允许循环引用
 			customizeBeanFactory(beanFactory);
+			//加载BeanDefinition到BeanFactory  重点
 			loadBeanDefinitions(beanFactory);
 			synchronized (this.beanFactoryMonitor) {
 				this.beanFactory = beanFactory;
@@ -223,6 +226,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @see DefaultListableBeanFactory#setAllowCircularReferences
 	 * @see DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
 	 * @see DefaultListableBeanFactory#setAllowEagerClassLoading
+	 * BeanDefinition 的覆盖问题可能会有开发者碰到这个坑，就是在配置文件中定义 bean 时使用了相同的 id 或 name，默认情况下，allowBeanDefinitionOverriding 属性为 null（Boolean类型），如果在同一配置文件中重复了，会抛错，但是如果不是同一配置文件中，会发生覆盖
+	 * 默认允许循环依赖
 	 */
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
 		if (this.allowBeanDefinitionOverriding != null) {

@@ -33,6 +33,7 @@ import org.springframework.lang.Nullable;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * 组合定义信息，拓展 Bean 引用信息的属性
  */
 public class BeanComponentDefinition extends BeanDefinitionHolder implements ComponentDefinition {
 

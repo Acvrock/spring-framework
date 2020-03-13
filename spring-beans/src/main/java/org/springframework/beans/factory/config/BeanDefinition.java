@@ -37,6 +37,9 @@ import org.springframework.lang.Nullable;
  * @see ConfigurableListableBeanFactory#getBeanDefinition
  * @see org.springframework.beans.factory.support.RootBeanDefinition
  * @see org.springframework.beans.factory.support.ChildBeanDefinition
+ *
+ * BeanDefinition 用来定义 Bean 的作用范围，角色、依赖、懒加载等与 Spring 容器运行管理相关属性，以达到对 Bean 的 Spring 特性的定制
+ * 是 Spring 描述定义的核心关键类
  */
 public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 

@@ -30,6 +30,9 @@ import org.springframework.lang.Nullable;
  * @since 2.5
  * @see AnnotatedGenericBeanDefinition
  * @see org.springframework.core.type.AnnotationMetadata
+ *
+ * 获取注解 Bean 的相关描述及定义信息
+ *
  */
 public interface AnnotatedBeanDefinition extends BeanDefinition {
 

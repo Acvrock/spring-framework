@@ -262,11 +262,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}else {
 			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
+			// 如果发现当前线程已经在创建这个实例中，需要提示错误，因为此时可能为循环依赖
 			if (isPrototypeCurrentlyInCreation(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
 
-			// Check if bean definition exists in this factory.
+			// Check if bean definition exists in this factory. 获取父工厂，先看自己有没有Bean定义，如果没有就去父工厂找
 			BeanFactory parentBeanFactory = getParentBeanFactory();
 			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// Not found -> check parent.
@@ -288,24 +289,30 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 
+			// 走到这里，说明本身有Bean定义，或者 parentBeanFactory 空了
 			if (!typeCheckOnly) {
 				markBeanAsCreated(beanName);
 			}
 
 			try {
+				// 通过当前 BeaName 获取已经合并过的 Bean 描述信息，为创建、解决Bean的依赖注入等问题提供信息数据
 				final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 				checkMergedBeanDefinition(mbd, beanName, args);
 
 				// Guarantee initialization of beans that the current bean depends on.
+				// 获取依赖列表，这里只是考虑了 DependsOn 属性的循环依赖关系，不是常见遇到的循环依赖问题
 				String[] dependsOn = mbd.getDependsOn();
 				if (dependsOn != null) {
 					for (String dep : dependsOn) {
+						// 检查是否存在循环依赖
 						if (isDependent(beanName, dep)) {
 							throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 									"Circular depends-on relationship between '" + beanName + "' and '" + dep + "'");
 						}
+						// 标记 dep 被 beanName 依赖到，循环依赖检查用到此处的关系
 						registerDependentBean(dep, beanName);
 						try {
+							// 初始化依赖的Bean
 							getBean(dep);
 						}
 						catch (NoSuchBeanDefinitionException ex) {
@@ -378,6 +385,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 
 		// Check if required type matches the type of the actual bean instance.
+//		返回类型转换
 		if (requiredType != null && !requiredType.isInstance(bean)) {
 			try {
 				T convertedBean = getTypeConverter().convertIfNecessary(bean, requiredType);
