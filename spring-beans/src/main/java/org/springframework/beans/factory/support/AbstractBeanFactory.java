@@ -238,6 +238,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * not for actual use
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
+	 * beanName 解析转换
+	 * 检测 手动注册Bean
+	 * 双亲容器检测
+	 * 依赖初始化（递归）
+	 * 创建Bean createBean()
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredType,
@@ -247,6 +252,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
+		// 检测已经注册的Bean，保证不重复创建
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
@@ -263,6 +269,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
 			// 如果发现当前线程已经在创建这个实例中，需要提示错误，因为此时可能为循环依赖
+			//这里的判断只针对scope为prototype类型的bean
 			if (isPrototypeCurrentlyInCreation(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
@@ -309,7 +316,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 							throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 									"Circular depends-on relationship between '" + beanName + "' and '" + dep + "'");
 						}
+						// 注册依赖关系
 						// 标记 dep 被 beanName 依赖到，循环依赖检查用到此处的关系
+						// 初始化和销毁顺序也用到
+						// 这么做的原因是Spring在即将进行bean销毁的时候会【首先销毁被依赖的bean】。
+						// 依赖关系的保存是通过一个ConcurrentHashMap<String, Set>完成的，key是bean的真实名字。
+
 						registerDependentBean(dep, beanName);
 						try {
 							// 初始化依赖的Bean
@@ -1192,6 +1204,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * and resolving aliases to canonical names.
 	 * @param name the user-specified name
 	 * @return the transformed bean name
+	 * // 处理两个情况，
+	 * 1. 将别名转化成真的beanName；
+	 * 2. 把FactoryBean的前缀"&"给去了
 	 */
 	protected String transformedBeanName(String name) {
 		return canonicalName(BeanFactoryUtils.transformedBeanName(name));
@@ -1781,6 +1796,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the canonical bean name
 	 * @param mbd the merged bean definition
 	 * @return the object to expose for the bean
+	 *  如果目前获得的sharedInstance 不是FactoryBean，那bean就赋值成sharedInstance，直接返回
+	 * 	 如果是FactoryBean就返回FactoryBean创建的实例
 	 */
 	protected Object getObjectForBeanInstance(
 			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
@@ -1809,8 +1826,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Object object = null;
 		if (mbd != null) {
 			mbd.isFactoryBean = true;
-		}
-		else {
+		} else {
 			object = getCachedObjectForFactoryBean(beanName);
 		}
 		if (object == null) {
