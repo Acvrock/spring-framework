@@ -34,6 +34,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Oliver Gierke
  * @author Juergen Hoeller
  * @since 4.0
+ * 继承了CglibAopProxy
  */
 @SuppressWarnings("serial")
 class ObjenesisCglibAopProxy extends CglibAopProxy {

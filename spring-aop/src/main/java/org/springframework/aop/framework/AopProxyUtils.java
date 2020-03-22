@@ -189,6 +189,8 @@ public abstract class AopProxyUtils {
 	 * Check equality of the proxies behind the given AdvisedSupport objects.
 	 * Not the same as equality of the AdvisedSupport objects:
 	 * rather, equality of interfaces, advisors and target sources.
+	 * 代理对象相等性比较，两个引用是同一个对象，或者：
+	 * advisors 相同并且原对象相同，并且接口相同
 	 */
 	public static boolean equalsInProxy(AdvisedSupport a, AdvisedSupport b) {
 		return (a == b ||

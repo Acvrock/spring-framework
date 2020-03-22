@@ -118,8 +118,11 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		if (logger.isTraceEnabled()) {
 			logger.trace("Creating JDK dynamic proxy: " + this.advised.getTargetSource());
 		}
+		// 处理代理接口
 		Class<?>[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised, true);
+		// 判断接口定义是否有equals和hashCode方法
 		findDefinedEqualsAndHashCodeMethods(proxiedInterfaces);
+		// 调用JDK创建代理方法
 		return Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
 	}
 
@@ -157,22 +160,27 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		Object oldProxy = null;
 		boolean setProxyContext = false;
 
+		// 获取目标对象
 		TargetSource targetSource = this.advised.targetSource;
 		Object target = null;
 
 		try {
+			// equals方法特殊处理
 			if (!this.equalsDefined && AopUtils.isEqualsMethod(method)) {
 				// The target does not implement the equals(Object) method itself.
 				return equals(args[0]);
 			}
+			// hashCode方法特殊处理
 			else if (!this.hashCodeDefined && AopUtils.isHashCodeMethod(method)) {
 				// The target does not implement the hashCode() method itself.
 				return hashCode();
 			}
+			// 如果方法所在类为 DecoratingProxy，则直接调用返回 targetClass，DecoratingProxy只有一个方法
 			else if (method.getDeclaringClass() == DecoratingProxy.class) {
 				// There is only getDecoratedClass() declared -> dispatch to proxy config.
 				return AopProxyUtils.ultimateTargetClass(this.advised);
 			}
+			// 调用Advised接口中的方法，直接反射执行
 			else if (!this.advised.opaque && method.getDeclaringClass().isInterface() &&
 					method.getDeclaringClass().isAssignableFrom(Advised.class)) {
 				// Service invocations on ProxyConfig with the proxy config...
@@ -180,7 +188,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			}
 
 			Object retVal;
-
+			// 如果exposeProxy设置为true，设置当前Proxy，它是ThreadLocal级别的
 			if (this.advised.exposeProxy) {
 				// Make invocation available if necessary.
 				oldProxy = AopContext.setCurrentProxy(proxy);
@@ -192,11 +200,12 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			target = targetSource.getTarget();
 			Class<?> targetClass = (target != null ? target.getClass() : null);
 
-			// Get the interception chain for this method.
+			// Get the interception chain for this method.	// 获取拦截器链
 			List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 
 			// Check whether we have any advice. If we don't, we can fallback on direct
 			// reflective invocation of the target, and avoid creating a MethodInvocation.
+			// 如果拦截器链为空，则直接反射调用
 			if (chain.isEmpty()) {
 				// We can skip creating a MethodInvocation: just invoke the target directly
 				// Note that the final invoker must be an InvokerInterceptor so we know it does
@@ -205,10 +214,10 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				retVal = AopUtils.invokeJoinpointUsingReflection(target, method, argsToUse);
 			}
 			else {
-				// We need to create a method invocation...
+				// We need to create a method invocation...// 生成MethodInvocation，进行链式调用
 				MethodInvocation invocation =
 						new ReflectiveMethodInvocation(proxy, target, method, args, targetClass, chain);
-				// Proceed to the joinpoint through the interceptor chain.
+				// Proceed to the joinpoint through the interceptor chain. 递归调用
 				retVal = invocation.proceed();
 			}
 
@@ -222,6 +231,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				// a reference to itself in another returned object.
 				retVal = proxy;
 			}
+			// 返回值为基础类型报错
 			else if (retVal == null && returnType != Void.TYPE && returnType.isPrimitive()) {
 				throw new AopInvocationException(
 						"Null return value from advice does not match primitive return type for: " + method);
@@ -230,7 +240,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		}
 		finally {
 			if (target != null && !targetSource.isStatic()) {
-				// Must have come from TargetSource.
+				// Must have come from TargetSource.// 释放target资源，由TargetSource子类实现
 				targetSource.releaseTarget(target);
 			}
 			if (setProxyContext) {
