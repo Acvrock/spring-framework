@@ -53,6 +53,7 @@ import org.springframework.util.CollectionUtils;
  *
  * <p>This class is serializable; subclasses need not be.
  * This class is used to hold snapshots of proxies.
+ * AdvisedSupport本身不会提供创建代理的任何方法，专注于生成拦截器链。委托给ProxyCreatorSupport去创建代理对象
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

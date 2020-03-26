@@ -249,8 +249,8 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	@Override
 	@Nullable
 	public Object getObject() throws BeansException {
-		initializeAdvisorChain();
-		if (isSingleton()) {
+		initializeAdvisorChain();// 初始化Advisor链
+		if (isSingleton()) { // 获取真正的代理对象
 			return getSingletonInstance();
 		}
 		else {
@@ -316,7 +316,9 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 */
 	private synchronized Object getSingletonInstance() {
 		if (this.singletonInstance == null) {
-			this.targetSource = freshTargetSource();
+			this.targetSource = freshTargetSource();// 返回targetSource
+			// 自动发现目标对象的接口集合
+			//对于代理接口集合为空，且proxyTargetClass为空时，从targetClass获取其实现的接口集合作为代理接口。因而在配置ProxyFactoryBean时，可以不用指定interfaces属性
 			if (this.autodetectInterfaces && getProxiedInterfaces().length == 0 && !isProxyTargetClass()) {
 				// Rely on AOP infrastructure to tell us what interfaces to proxy.
 				Class<?> targetClass = getTargetClass();
@@ -450,7 +452,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				if (logger.isTraceEnabled()) {
 					logger.trace("Configuring advisor or advice '" + name + "'");
 				}
-
+					//名称全局匹配
 				if (name.endsWith(GLOBAL_SUFFIX)) {
 					if (!(this.beanFactory instanceof ListableBeanFactory)) {
 						throw new AopConfigException(
@@ -463,6 +465,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				else {
 					// If we get here, we need to add a named interceptor.
 					// We must check if it's a singleton or prototype.
+					///名称精确匹配，单例的直接实例化，模板的延迟实例化
 					Object advice;
 					if (this.singleton || this.beanFactory.isSingleton(name)) {
 						// Add the real Advisor/Advice to the chain.
@@ -555,7 +558,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	private void addAdvisorOnChainCreation(Object next, String name) {
 		// We need to convert to an Advisor if necessary so that our source reference
 		// matches what we find from superclass interceptors.
-		Advisor advisor = namedBeanToAdvisor(next);
+		Advisor advisor = namedBeanToAdvisor(next);// 转换Bean对象为Advisor
 		if (logger.isTraceEnabled()) {
 			logger.trace("Adding advisor with name '" + name + "'");
 		}

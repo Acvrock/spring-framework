@@ -85,10 +85,11 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 
 		if (aspectNames == null) {
 			synchronized (this) {
-				aspectNames = this.aspectBeanNames;
+				aspectNames = this.aspectBeanNames;		// 缓存aspectName
 				if (aspectNames == null) {
 					List<Advisor> advisors = new ArrayList<>();
 					aspectNames = new ArrayList<>();
+					// 获取所有spring容器中的bean
 					String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 							this.beanFactory, Object.class, true, false);
 					for (String beanName : beanNames) {
@@ -101,15 +102,18 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 						if (beanType == null) {
 							continue;
 						}
+						// 有@Aspect注解
 						if (this.advisorFactory.isAspect(beanType)) {
 							aspectNames.add(beanName);
 							AspectMetadata amd = new AspectMetadata(beanType, beanName);
 							if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
+								// 创建Aspect实例工厂
 								MetadataAwareAspectInstanceFactory factory =
 										new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
+								// 根据Aspect实例工厂获取所有Advisor对象
 								List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
 								if (this.beanFactory.isSingleton(beanName)) {
-									this.advisorsCache.put(beanName, classAdvisors);
+									this.advisorsCache.put(beanName, classAdvisors);// 加入缓存
 								}
 								else {
 									this.aspectFactoryCache.put(beanName, factory);
@@ -139,6 +143,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 			return Collections.emptyList();
 		}
 		List<Advisor> advisors = new ArrayList<>();
+		// 如果aspectNames不为空，则从缓存中获取对应的Advisor
 		for (String aspectName : aspectNames) {
 			List<Advisor> cachedAdvisors = this.advisorsCache.get(aspectName);
 			if (cachedAdvisors != null) {

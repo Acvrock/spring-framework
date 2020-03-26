@@ -35,6 +35,7 @@ import org.springframework.util.ObjectUtils;
  * @since 4.1
  * @see AbstractAdvisingBeanPostProcessor
  * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator
+ * 为代理创建器提供了一些公共方法实现
  */
 @SuppressWarnings("serial")
 public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanClassLoaderAware, AopInfrastructureBean {
@@ -100,11 +101,15 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 * to filter for reasonable proxy interfaces, falling back to a target-class proxy otherwise.
 	 * @param beanClass the class of the bean
 	 * @param proxyFactory the ProxyFactory for the bean
+	 * 这是它提供的一个最为核心的方法：这里决定了如果目标类没有实现接口直接就是Cglib代理
+	 * 检查给定beanClass上的接口们，并交给proxyFactory处理
 	 */
 	protected void evaluateProxyInterfaces(Class<?> beanClass, ProxyFactory proxyFactory) {
+		// 找到该类实现的所有接口
 		Class<?>[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, getProxyClassLoader());
 		boolean hasReasonableProxyInterface = false;
 		for (Class<?> ifc : targetInterfaces) {
+			//是否有存在【合理的】接口
 			if (!isConfigurationCallbackInterface(ifc) && !isInternalLanguageInterface(ifc) &&
 					ifc.getMethods().length > 0) {
 				hasReasonableProxyInterface = true;
@@ -118,6 +123,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 			}
 		}
 		else {
+			// 这个很明显设置true，表示使用CGLIB得方式去创建代理
 			proxyFactory.setProxyTargetClass(true);
 		}
 	}

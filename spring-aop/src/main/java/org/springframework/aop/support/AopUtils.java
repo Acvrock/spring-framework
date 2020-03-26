@@ -301,6 +301,7 @@ public abstract class AopUtils {
 	 * @param clazz the target class
 	 * @return sublist of Advisors that can apply to an object of the given class
 	 * (may be the incoming List as-is)
+	 * 对不同类型的Advisor进行不同的处理，如IntroductionAdvisor和PointcutAdvisor
 	 */
 	public static List<Advisor> findAdvisorsThatCanApply(List<Advisor> candidateAdvisors, Class<?> clazz) {
 		if (candidateAdvisors.isEmpty()) {
@@ -317,7 +318,7 @@ public abstract class AopUtils {
 			if (candidate instanceof IntroductionAdvisor) {
 				// already processed
 				continue;
-			}
+			}// 匹配Advisor是否适用当前bean
 			if (canApply(candidate, clazz, hasIntroductions)) {
 				eligibleAdvisors.add(candidate);
 			}

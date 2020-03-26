@@ -128,6 +128,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * created by the '{@code <aop:config/>}' tag. Will force class proxying if the
 	 * '{@code proxy-target-class}' attribute is set to '{@code true}'.
 	 * @see AopNamespaceUtils
+	 * 完成了自动代理配置的初始化
 	 */
 	private void configureAutoProxyCreator(ParserContext parserContext, Element element) {
 		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(parserContext, element);
@@ -319,19 +320,19 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		try {
 			this.parseState.push(new AdviceEntry(parserContext.getDelegate().getLocalName(adviceElement)));
 
-			// create the method factory bean
+			// create the method factory bean		// 用来获取切面类中的增强方法Method对象的工厂bean
 			RootBeanDefinition methodDefinition = new RootBeanDefinition(MethodLocatingFactoryBean.class);
 			methodDefinition.getPropertyValues().add("targetBeanName", aspectName);
 			methodDefinition.getPropertyValues().add("methodName", adviceElement.getAttribute("method"));
 			methodDefinition.setSynthetic(true);
 
-			// create instance factory definition
+			// create instance factory definition		// 用来获取切面类对象的工厂bean
 			RootBeanDefinition aspectFactoryDef =
 					new RootBeanDefinition(SimpleBeanFactoryAwareAspectInstanceFactory.class);
 			aspectFactoryDef.getPropertyValues().add("aspectBeanName", aspectName);
 			aspectFactoryDef.setSynthetic(true);
 
-			// register the pointcut
+			// register the pointcut		// 根据不同的增强标签创建不同的增强BeanDefinition
 			AbstractBeanDefinition adviceDef = createAdviceDefinition(
 					adviceElement, parserContext, aspectName, order, methodDefinition, aspectFactoryDef,
 					beanDefinitions, beanReferences);
